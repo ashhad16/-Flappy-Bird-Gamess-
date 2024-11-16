@@ -28,39 +28,47 @@ canvas.height = 600;
 // Handle keyboard input for PC
 document.addEventListener("keydown", function(event) {
     if (event.code === "Space" && !isGameOver) {
-        bird.velocity = bird.flap;
+        bird.velocity = bird.flap; // Bird flaps on spacebar
     } else if (isGameOver && event.code === "Enter") {
-        resetGame();
+        resetGame(); // Restart game on Enter when it's over
     }
 });
 
 // Handle touch input for mobile
 document.addEventListener("touchstart", function(event) {
     if (!isGameOver) {
-        bird.velocity = bird.flap;
+        bird.velocity = bird.flap; // Bird flaps on touch
     } else {
-        // Prevent scrolling on touch start
-        event.preventDefault();
+        event.preventDefault(); // Prevent scrolling on touch when game is over
     }
 });
 
-// Optional: Handle touch end if you want to implement more specific behavior for touch events
-document.addEventListener("touchend", function(event) {
-    // You can add additional behavior here if needed
+// Prevent scrolling on touchmove for mobile devices
+document.addEventListener("touchmove", function(event) {
+    if (isGameOver) {
+        event.preventDefault(); // Prevent scroll on game over
+    }
 });
 
-// Update game objects
+// Optional: Restart game on touchend (for mobile)
+document.addEventListener("touchend", function(event) {
+    if (isGameOver) {
+        resetGame(); // Restart game on touch end when it's over
+    }
+});
+
+// Update game objects (bird and pipes)
 function update() {
     if (isGameOver) return;
 
     // Bird physics
-    bird.velocity += bird.gravity;
-    bird.y += bird.velocity;
+    bird.velocity += bird.gravity; // Apply gravity to the bird's velocity
+    bird.y += bird.velocity; // Update bird's position
 
-    // Pipe movement and collision
+    // Move pipes and detect collision with bird
     if (pipes.length > 0) {
         pipes.forEach((pipe, index) => {
-            pipe.x -= 3;
+            pipe.x -= 3; // Move pipes leftward
 
             // Detect collision with bird
             if (
@@ -68,13 +76,13 @@ function update() {
                 bird.x < pipe.x + PIPE_WIDTH &&
                 (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)
             ) {
-                isGameOver = true;
+                isGameOver = true; // Collision detected, end game
             }
 
-            // Remove passed pipes
+            // Remove pipes that have passed the screen
             if (pipe.x + PIPE_WIDTH < 0) {
                 pipes.splice(index, 1);
-                score++;
+                score++; // Increment score when pipes pass
             }
         });
     }
@@ -91,39 +99,39 @@ function update() {
 
     // Check for ground or ceiling collision
     if (bird.y + bird.height >= canvas.height || bird.y <= 0) {
-        isGameOver = true;
+        isGameOver = true; // End game if bird hits ground or ceiling
     }
 }
 
-// Draw game objects
+// Draw game objects (bird, pipes, score, etc.)
 function draw() {
-    // Background
+    // Clear the canvas and set background color
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Bird
+    // Draw the bird
     ctx.fillStyle = "#FFD700";
     ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
-    // Pipes
+    // Draw pipes
     ctx.fillStyle = "#32CD32";
     pipes.forEach(pipe => {
-        ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.top);
-        ctx.fillRect(pipe.x, pipe.bottom, PIPE_WIDTH, canvas.height - pipe.bottom);
+        ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.top); // Top pipe
+        ctx.fillRect(pipe.x, pipe.bottom, PIPE_WIDTH, canvas.height - pipe.bottom); // Bottom pipe
     });
 
-    // Score
+    // Draw score
     ctx.fillStyle = "#000";
     ctx.font = "30px Arial";
     ctx.fillText("Score: " + score, 10, 30);
 
-    // Game Over message
+    // Draw Game Over message
     if (isGameOver) {
         ctx.fillStyle = "#000";
         ctx.font = "40px Arial";
         ctx.fillText("Game Over", canvas.width / 4, canvas.height / 2);
         ctx.font = "20px Arial";
-        ctx.fillText("Press Click to Restart", canvas.width / 3.5, canvas.height / 1.5);
+        ctx.fillText("Tap to Restart", canvas.width / 3.5, canvas.height / 1.5); // Mobile-friendly restart message
     }
 }
 
@@ -136,11 +144,11 @@ function resetGame() {
     isGameOver = false;
 }
 
-// Main game loop
+// Main game loop (update and draw continuously)
 function gameLoop() {
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(gameLoop); // Keep the game loop going
 }
 
 // Start the game
